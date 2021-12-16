@@ -51,26 +51,6 @@ impl PartialOrd for PrioritizedNode {
     }
 }
 
-fn neighbors(node: &PrioritizedNode, dims: (usize, usize)) -> Vec<(usize, usize)> {
-    let (n, m) = dims;
-    let (i, j) = (node.i, node.j);
-
-    let mut result = vec![];
-    if i != 0 {
-        result.push((i-1, j));
-    }
-    if j != 0 {
-        result.push((i, j-1));
-    }
-    if i != n-1 {
-        result.push((i+1, j));
-    }
-    if j != m-1 {
-        result.push((i, j+1));
-    }
-    result
-}
-
 pub fn best_path_through(cave: &Cave) -> usize {
     let (n, m) = cave.dims;
     let mut visited = vec![vec![false; m]; n];
@@ -95,11 +75,20 @@ pub fn best_path_through(cave: &Cave) -> usize {
             break;
         }
 
-        for (k, l) in neighbors(&pn, (n, m)) {
+        for (d1, d2) in [(1, 0), (-1, 0), (0, 1), (0, -1)] {
+            let k = i as i64 + d1;
+            let l = j as i64 + d2;
+            if k < 0 || k >= n as i64 {
+                continue;
+            }
+            if l < 0 || l >= m as i64 {
+                continue;
+            }
+            let k = k as usize;
+            let l = l as usize;
             if visited[k][l] {
                 continue;
             }
-
 
             let best_distance_so_far = distances[k][l];
             let distance_through_current = current_dist + cave.risk_levels[k][l] as usize;
